@@ -1,0 +1,179 @@
+//ex) Text file contents - saved as argument
+/*4 4
+0 0 0 7 
+0 1 2 0 
+0 3 0 4
+6 0 0 5
+*/
+
+#include <iostream>
+#include <fstream>
+
+using namespace std;
+
+//Create Node
+struct Node
+{
+    int row;
+    int col;
+    int value;
+    Node* next; 
+};
+
+//Create Matrix
+struct Matrix
+{
+    int row;
+    int col;
+    Node* head;
+};
+
+
+void add_node(Node** head_ref, int r, int c, int v) //create add_node method
+{
+    //allocate node  
+    Node* new_node = new Node();
+
+    Node* last = *head_ref;
+
+    //Put in the data  
+    new_node->row = r;
+    /* same as
+    * add_node* row = new add_node;
+    * (*row).r = r 
+    */
+    new_node->col = c;
+    new_node->value = v;
+
+    new_node->next = NULL;
+
+    // if the linked list has null value(is empty), make the new node as head  
+    if (*head_ref == NULL)
+    {
+        *head_ref = new_node;
+        return;
+    }
+
+    //Else traverse till the last node  
+    while (last->next != NULL)
+    {
+        last = last->next;
+    }
+
+    //Change the next of last node  
+    last->next = new_node;
+    return;
+}
+
+
+void read_matrix(Matrix* matrix, const char* filename)
+{
+    int col = 0, row = 0, value = 0;
+    ifstream input; //ifstream = input file stream
+    input.open(filename); //open textfile which is called "text" that saved in source files 
+    if (!input.good()) //if file not opened, display "Cannot open file" and finish the code.
+    {
+        cout << "Cannot open file " << filename << endl;
+        exit(0);
+    }
+    input >> row >> col;
+    matrix->row = row;
+    matrix->col = col;
+
+    //read matrix 
+    for (int r = 0; r < row; r++)
+    {
+        for (int c = 0; c < col; c++)
+        {
+            input >> value;
+            if (value != 0) //if the value is not 0, display the value
+            {
+                add_node(&matrix->head, r, c, value); //if this code commented, all the values will be 0 in matrix1
+            }
+        }
+    }
+    input.close();// close the file
+}
+
+int get_value(Matrix* mat, int row, int col)
+{
+    Node* ptr = mat->head;
+    while (ptr)
+    {
+        if (ptr->row == row && ptr->col == col)
+        {
+            return ptr->value;
+        }
+        ptr = ptr->next;
+    }
+    return 0;
+}
+
+void add_matrix(Matrix* mat)
+{
+    //Display the value which is not 0
+    Node* ptr = mat->head;
+    while (ptr)
+    {
+        cout << ptr->value << " ";
+        ptr = ptr->next;
+    }
+    cout << endl;
+    
+    //Display the spare matrix
+    for (int r = 0; r < mat->row; r++)
+    {
+        for (int c = 0; c < mat->col; c++)
+        {
+            cout << get_value(mat, r, c) << " ";
+        }
+       cout << endl;
+    }
+
+}
+
+void add_matrix(Matrix* A, Matrix* B, Matrix* C)
+{
+    C->row = A->row; // row of matrix c (matrix_result) is same as matrix a's row
+    C->col = A->col; //column of matrix c (matrix_result) is same as matrix a's column
+    for (int r = 0; r < A->row; r++)
+    {
+        for (int c = 0; c < A->col; c++)
+        {
+            int value = get_value(A, r, c) + get_value(B, r, c); //add value of matrix1 and matrix2
+            if (value != 0) //if value is not 0,
+            {
+                add_node(&C->head, r, c, value); //add value into matrix_result
+            }
+        }
+    }
+}
+
+int main(int argc, char** argv)
+{
+    //Define A,B,C
+    Matrix A = { };
+    Matrix B = { };
+    Matrix C = { };
+    
+    if (argc != 3)
+    {
+        cout<<"needs two matrices" <<endl;
+        exit(0);
+    }
+    read_matrix(&A, argv[1]); //call read_matrix method
+    //display matrix1 
+    cout << "Matrix 1: "; 
+    add_matrix(&A);
+
+    read_matrix(&B, argv[2]);
+    cout << "Matrix 2: ";
+    add_matrix(&B);
+
+    add_matrix(&A, &B, &C); //add matrix1(&A) and matrix2(&B) and save into matrix result(&C) 
+
+    cout << "Matrix Result: ";
+    add_matrix(&C);
+
+    return 0;
+}
