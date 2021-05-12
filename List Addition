@@ -1,0 +1,218 @@
+#include <cstdlib>
+#include <iostream>
+#include <fstream>
+#include <locale>
+#include <sstream>
+#include <string>
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+using namespace std;
+
+template <class T>
+class List
+{
+private:
+    struct Node
+    {
+        T data;
+        Node* next;
+    };
+    Node* front, * current;
+public:
+    List();
+    ~List();
+    void AddtoFront(T newthing);
+    bool FirstItem(T& item);
+    bool NextItem(T& item);
+    void Reverse();
+};
+
+template <class T>
+List<T>::List()
+{
+    front = NULL;  current = NULL;
+}
+
+template <class T>
+List<T>::~List()
+{
+
+}
+
+template <class T>
+void List<T>::AddtoFront(T newthing)
+{
+    Node* temp;
+    temp = new Node;
+    temp->data = newthing;
+    temp->next = front;
+    front = temp;
+}
+
+template <class T>
+bool List<T>::FirstItem(T& item)
+{
+    if (front == NULL)
+    {
+        return false;
+    }
+    item = front->data;
+    current = front;
+    return true;
+}
+
+template <class T>
+bool List<T>::NextItem(T& item)
+{
+    if (current == NULL)
+        return false;
+    current = current->next;
+    if (current == NULL)
+        return false;
+    item = current->data;
+    return true;
+}
+
+template <class T>
+void List<T>::Reverse()
+{
+    Node* temp1, * temp2;
+    current = front->next;
+    temp2 = front;
+
+    while (current != NULL)
+    {
+        temp1 = current->next;
+        current->next = front;
+        front = current;
+        current = temp1;
+    }
+    temp2->next = NULL;
+}
+
+class BigNumber
+{
+private:
+    List <int> listofdigits;
+
+public:
+    BigNumber();
+    ~BigNumber();
+    void ReadFromString(string decstring);
+    void PrintBigNumber();
+    void AddBigNumbers(BigNumber B1, BigNumber B2);
+};
+
+BigNumber::BigNumber()
+{
+
+};
+
+BigNumber::~BigNumber()
+{
+
+}
+
+
+void BigNumber::ReadFromString(string decstring)
+{
+    for (int i = 0; i < decstring.size(); i++)
+    {
+        if (decstring[i] != '\n' && decstring[i] != '\r')
+        {
+            int temp = decstring[i] - 48;
+            listofdigits.AddtoFront(temp);
+        }
+    }
+}
+
+void BigNumber::PrintBigNumber()
+{
+    listofdigits.Reverse();
+    int digit;
+    bool chk = listofdigits.FirstItem(digit);
+    while (chk)
+    {
+        cout << digit;
+        chk = listofdigits.NextItem(digit);
+    }
+    cout << '\n';
+    listofdigits.Reverse();
+}
+
+
+void BigNumber::AddBigNumbers(BigNumber B1, BigNumber B2)
+{
+    int n1, n2, n3;
+    bool chk1 = B1.listofdigits.FirstItem(n1);
+    bool chk2 = B2.listofdigits.FirstItem(n2);
+
+    int carry = 0;
+
+    while (chk1 || chk2)
+    {
+        if (!chk1)
+        {
+            n1 = 0;
+        }
+        if (!chk2)
+        {
+            n2 = 0;
+        }
+        n3 = n1 + n2 + carry;
+        if (n3 < 10)
+        {
+            carry = 0;
+        }
+        else
+        {
+            carry = 1;
+            n3 %= 10;
+        }
+        listofdigits.AddtoFront(n3);
+        chk1 = B1.listofdigits.NextItem(n1);
+        chk2 = B2.listofdigits.NextItem(n2);
+    }
+    if (carry == 1)
+    {
+        listofdigits.AddtoFront(carry);
+    }
+    listofdigits.Reverse();
+}
+
+BigNumber B1, B2, RES;
+
+int main(int argc, char** argv)
+{
+    string numberstring;
+    int stringseq = 0;
+    ifstream input_file;
+    if (argc == 2) input_file.open(argv[1]);
+    else
+    {
+        cout << "cannot read the file " << argv[1] << endl; exit(0);
+    }
+
+    while (!input_file.eof())
+    {
+        if (!input_file.eof())
+        {
+            getline(input_file, numberstring);
+            if (stringseq == 0)
+            {
+                B1.ReadFromString(numberstring);
+                stringseq = 1;
+            }
+            else B2.ReadFromString(numberstring);
+        }
+    }
+
+    B1.PrintBigNumber();
+    cout << "+" << endl;
+    B2.PrintBigNumber();
+    cout << "=" << endl;
+    RES.AddBigNumbers(B1, B2);
+    RES.PrintBigNumber();
+}
