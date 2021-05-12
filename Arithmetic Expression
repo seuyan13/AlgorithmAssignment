@@ -1,0 +1,135 @@
+//EX) Text file contents - saved as an arguement
+/*
+11
+32
+*
+2
++
+1
+/
+*/
+
+#define _CRT_SECURE_NO_WARNINGS //Prevent the error of printf and scanf
+#include <stdio.h>
+#include <stdlib.h>
+
+#include <iostream>
+#include <fstream>
+#include <stack>
+
+using namespace std;
+
+//Implement the Tree class
+class Tree 
+{
+private:
+	char data;
+	Tree* leftptr, * rightptr;
+
+public:
+	Tree(char newthing, Tree* L, Tree* R);
+	~Tree() { }
+	char RootData() { return data; }
+	Tree* Left() { return leftptr; }
+	Tree* Right() { return  rightptr; }
+};
+
+Tree::Tree(char newthing, Tree* L, Tree* R)
+{
+	data = newthing;
+	leftptr = L;
+	rightptr = R;
+}
+
+//Implement the stack
+stack<Tree*> S;
+
+//Implement the recursive funtions for traversals
+void inorder(Tree* t)
+{
+	if (t != NULL)
+	{
+		char data = t->RootData();
+		if (!isdigit(data))  //To show  ( ) for In-fix
+		{
+			printf("(");
+		}
+
+		inorder(t->Left());
+		printf("%c", t->RootData());
+		inorder(t->Right());
+
+		if (!isdigit(data))  //To show  ( ) for In-fix
+		{
+			printf(")");
+		}
+	}
+}
+
+int main(int argc, char** argv) //get filename from arguments
+{
+	char digit;
+	char oper;
+	char expression[100];
+	ifstream input_file;
+	if (argc == 2) input_file.open(argv[1]);
+	else 
+	{
+		printf("The program needs a filename as argument \n");
+		exit(0);
+	}
+
+	while (input_file >> expression)
+	{
+		if (isdigit(expression[0])) //check if the number or not
+		{
+			sscanf(expression, "%c", &digit); //read the number
+			Tree* t = new Tree(digit, NULL, NULL); //deal with the Stack
+			S.push(t);
+		}
+		else //if expression is the operator,
+		{
+			sscanf(expression, "%c", &oper); //read the operator
+			Tree* t, * t1, * t2;
+
+			//Pop 2 top nodes
+			t1 = S.top();
+			S.pop();
+			t2 = S.top();
+			S.pop(); //can be commented
+
+			// t1 and t2 are children of the new node
+			t = new Tree(oper, t2, t1);
+			S.push(t);
+		}
+	}
+	//print In-fix expression way
+	Tree* top = S.top();
+	printf("In-fix: \n");
+	inorder(top);
+	printf("\n");
+
+
+	//this codes for printing the Post-fix expression way later than the In-fix expression way
+
+	//read the file again
+	input_file.clear(); 
+	input_file.seekg(0, input_file.beg); //can use another ifstream with another file name ex)ifstream input_file_postFix
+	printf("Post-fix: \n");
+
+	//if ifstream input_file_postFix is used in line 115, this should be while (input_file_postFix >> expression)
+	while (input_file >> expression)
+	{
+		if (isdigit(expression[0])) //check if the number or not
+		{
+			sscanf(expression, "%c", &digit); //read the number
+			printf(" %c", digit); //and print
+		}
+		else //if expression is the operator,
+		{
+			sscanf(expression, "%c", &oper); //read the operator
+			printf(" %c", oper);  //and print
+		}
+	}
+}
+
