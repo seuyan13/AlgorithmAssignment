@@ -20,4 +20,4 @@ Visual Studio
 2. Click Properties
 3. Type name of text file in the Command Arguements filed in the Debugging tab in the Configuration Properties.
 
-NOTE: Text file should already saved in your Source files before save as argument.
+NOTE: Text file should be already saved in your Source files before save as argument.
