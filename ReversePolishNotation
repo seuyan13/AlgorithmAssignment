@@ -1,0 +1,154 @@
+//ex) Text file contents - saved as an arguement
+/*
+12
+5
+23
++
+*/
+
+#include <cstdlib>
+#include <iostream>
+#include <fstream>
+#include <locale>
+#include <sstream>
+
+using namespace std;
+
+//Create Node
+struct Node
+{
+	int data;
+	Node* next;
+};
+class Stack
+{
+private:
+	Node* listPointer;
+public:
+	Stack(); 
+	~Stack();
+	void Push(int newthing);
+	void Pop();
+	int Top();
+	bool isEmpty();
+};
+
+Stack::Stack() //constructor
+{
+	listPointer = NULL;
+}
+
+Stack::~Stack() //destructor
+{
+
+}
+
+void Stack::Push(int newthing) //place the new thing on top of the stack 
+{
+	Node *temp;
+	temp = new Node; //same as add node to front of linked- list
+	temp->data = newthing; 
+	temp->next = listPointer; //note: no overflow problem
+	listPointer = temp;
+}
+
+void Stack::Pop() //remove top item from the stack
+{
+	Node* p;
+	p = listPointer;
+	if (listPointer != NULL) //check to avoid underflow
+	{
+		listPointer = listPointer->next;
+		delete p; //delete a Temporary variable
+	}
+}
+
+int Stack::Top() //return the value of the top item
+{
+	if (listPointer != NULL)
+	{
+		return listPointer->data;
+	}
+}
+
+bool Stack::isEmpty()
+{
+	if (listPointer == NULL) //return true if the stack is empty
+	{
+		return true;
+	}
+	return false;
+}
+
+Stack A, B;
+
+
+int main(int argc, char** argv) //get arguments from command line
+{
+	Stack S;
+	int result, op1, op2, number, i;
+	int count_num = 0;
+	int count_oper = 0;
+	char oper;
+	string expression;
+	ifstream input_file;
+	if (argc != 2)
+	{
+		cout << "needs a filename as argument  " << endl;
+		exit(0);
+	}
+	input_file.open(argv[1]);
+	if (!input_file.good())
+	{
+		cout << "cannot read file " << argv[1] << endl;
+		exit(0);
+	}
+	while (!input_file.eof())
+	{
+		getline(input_file, expression);
+		if (isdigit(expression[0]))
+		{
+			stringstream line(expression);
+			line >> number;
+			cout << "reading number " << number << endl;
+			count_num++;
+
+			S.Push(number);
+			//PUSH number
+		}
+		else
+		{
+			if (expression[0] == '+' || expression[0] == '-' || expression[0] == '/' || expression[0] == '*')
+			{
+				stringstream line(expression);
+				line >> oper;
+				cout << "reading operator " << oper << endl;
+				count_oper++;
+				op2 = S.Top();
+				S.Pop(); //delete
+				op1 = S.Top();
+				S.Pop();
+				//compute result	
+				if (oper == '+') result = op1 + op2; //order of op1 and op2 is matter
+				if (oper == '-') result = op1 - op2;
+				if (oper == '*') result = op1 * op2; //order of op1 and op2 doens't matter in * calculate
+				if (oper == '/') result = op1 / op2;
+				S.Push(result); //PUSH result
+			}
+		}
+	}
+
+	//check too many operators or numbers
+	if (count_num - count_oper >= 2)
+	{
+		cout << "too many numbers" << endl;
+	}
+	else if (count_oper >= count_num)
+	{
+		cout << "too many operators" << endl;
+	}
+	else
+	{
+		cout << "The result is " << S.Top(); //	//finalanswer = TOP
+	}
+}
